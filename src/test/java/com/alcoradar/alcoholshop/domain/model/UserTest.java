@@ -47,4 +47,12 @@ class UserTest {
         assertThat(user1).isEqualTo(user2);
         assertThat(user1.hashCode()).isEqualTo(user2.hashCode());
     }
+
+    @Test
+    void shouldNotBeEqualWhenDifferentId() {
+        User user1 = User.create("test1", "$2a$10$hash1", Role.USER);
+        User user2 = User.create("test2", "$2a$10$hash2", Role.USER);
+
+        assertThat(user1).isNotEqualTo(user2);
+    }
 }
