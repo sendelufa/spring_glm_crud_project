@@ -35,6 +35,17 @@ public class AlcoholShop {
     }
 
     /**
+     * Package-private constructor для реконструкции из persistence layer.
+     * Используется JPA entity для восстановления доменной сущности из базы данных.
+     * <p>
+     * WARNING: Не использовать напрямую в бизнес-логике! Используйте {@link #create()}
+     * </p>
+     */
+    AlcoholShop(boolean reconstructed) {
+        // Constructor for reconstruction from persistence layer
+    }
+
+    /**
      * Factory method для создания алкомаркета
      *
      * @param name название магазина (не может быть пустым или null)
@@ -138,6 +149,72 @@ public class AlcoholShop {
             throw new IllegalArgumentException("Адрес не может быть пустым");
         }
         this.address = address;
+    }
+
+    // Package-private setters for reconstruction from persistence layer
+
+    /**
+     * Устанавливает ID при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    /**
+     * Устанавливает название при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setNameForReconstruction(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Устанавливает адрес при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setAddressForReconstruction(String address) {
+        this.address = address;
+    }
+
+    /**
+     * Устанавливает координаты при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setCoordinatesForReconstruction(Coordinates coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    /**
+     * Устанавливает телефон при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setPhoneNumberForReconstruction(PhoneNumber phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    /**
+     * Устанавливает режим работы при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setWorkingHoursForReconstruction(WorkingHours workingHours) {
+        this.workingHours = workingHours;
+    }
+
+    /**
+     * Устанавливает тип магазина при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setShopTypeForReconstruction(ShopType shopType) {
+        this.shopType = shopType;
+    }
+
+    /**
+     * Устанавливает дату создания при реконструкции из persistence layer.
+     * WARNING: Только для внутреннего использования в infrastructure layer!
+     */
+    public void setCreatedAtForReconstruction(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     // equals, hashCode, toString
