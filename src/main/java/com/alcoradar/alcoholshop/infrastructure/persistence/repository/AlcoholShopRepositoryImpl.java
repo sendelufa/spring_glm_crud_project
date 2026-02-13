@@ -5,6 +5,8 @@ import com.alcoradar.alcoholshop.domain.model.AlcoholShop;
 import com.alcoradar.alcoholshop.domain.repository.AlcoholShopRepository;
 import com.alcoradar.alcoholshop.infrastructure.persistence.entity.AlcoholShopEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -108,6 +110,23 @@ public class AlcoholShopRepositoryImpl implements AlcoholShopRepository {
         return entities.stream()
             .map(AlcoholShopEntity::toDomain)
             .toList();
+    }
+
+    /**
+     * Возвращает страницу алкомаркетов с пагинацией и сортировкой
+     *
+     * <p>Делегирует вызов в Spring Data JPA и конвертирует все результаты в Domain Entity.</p>
+     *
+     * @param pageable параметры пагинации и сортировки
+     * @return страница с алкомаркетами
+     */
+    @Override
+    public Page<AlcoholShop> findAll(Pageable pageable) {
+        // Получаем страницу Entity через Spring Data JPA
+        Page<AlcoholShopEntity> entityPage = springDataRepository.findAll(pageable);
+
+        // Конвертируем Entity -> Domain через map
+        return entityPage.map(AlcoholShopEntity::toDomain);
     }
 
     /**

@@ -1,6 +1,8 @@
 package com.alcoradar.alcoholshop.domain.repository;
 
 import com.alcoradar.alcoholshop.domain.model.AlcoholShop;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +56,17 @@ public interface AlcoholShopRepository {
      * @return список всех алкомаркетов
      */
     List<AlcoholShop> findAll();
+
+    /**
+     * Возвращает страницу алкомаркетов с пагинацией и сортировкой
+     *
+     * <p>Использует Spring Data {@link Pageable} для гибкой настройки пагинации
+     * и сортировки результатов.</p>
+     *
+     * @param pageable объект пагинации и сортировки
+     * @return страница с алкомаркетами
+     */
+    Page<AlcoholShop> findAll(Pageable pageable);
 
     /**
      * Проверяет существование алкомаркета по ID
