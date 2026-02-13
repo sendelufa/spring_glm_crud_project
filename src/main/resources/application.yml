@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: alcohol-shop-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/alcohol_shop
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+
+server:
+  port: 8080
+  shutdown: graceful
+
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    com.alcoradar.alcoholshop: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

@@ -1,0 +1,14 @@
+/**
+ * Application Layer - Use cases and application services.
+ *
+ * <p>This package contains:</p>
+ * <ul>
+ *   <li>Use Cases - application-specific business workflows</li>
+ *   <li>Application Services - orchestrate domain objects</li>
+ *   <li>Input/Output DTOs - data transfer objects for use cases</li>
+ *   <li>Repository Interfaces (application-side) - ports for infrastructure</li>
+ * </ul>
+ *
+ * @package com.alcoradar.alcoholshop.application
+ */
+package com.alcoradar.alcoholshop.application;

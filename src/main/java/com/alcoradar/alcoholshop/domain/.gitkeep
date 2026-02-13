@@ -1,0 +1,15 @@
+/**
+ * Domain Layer - Core business logic.
+ *
+ * <p>This package contains:</p>
+ * <ul>
+ *   <li>Entities - core business objects with identity</li>
+ *   <li>Value Objects - immutable objects without identity</li>
+ *   <li>Domain Services - business logic that doesn't naturally fit in entities</li>
+ *   <li>Repository Interfaces - ports for data access</li>
+ *   <li>Domain Events - events published when something happens in the domain</li>
+ * </ul>
+ *
+ * @package com.alcoradar.alcoholshop.domain
+ */
+package com.alcoradar.alcoholshop.domain;

@@ -1,0 +1,15 @@
+/**
+ * Infrastructure Layer - Technical implementations.
+ *
+ * <p>This package contains:</p>
+ * <ul>
+ *   <li>JPA Repository implementations - adapters for repository interfaces</li>
+ *   <li>Mappers - MapStruct mappers for entity/DTO conversion</li>
+ *   <li>Database Configuration - PostgreSQL, Flyway, etc.</li>
+ *   <li>External Service Clients - integrations with external systems</li>
+ *   <li>Spring Configuration beans</li>
+ * </ul>
+ *
+ * @package com.alcoradar.alcoholshop.infrastructure
+ */
+package com.alcoradar.alcoholshop.infrastructure;

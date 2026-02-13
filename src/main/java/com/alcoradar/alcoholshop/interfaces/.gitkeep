@@ -1,0 +1,15 @@
+/**
+ * Interface Layer - External interfaces.
+ *
+ * <p>This package contains:</p>
+ * <ul>
+ *   <li>REST Controllers - HTTP endpoints</li>
+ *   <li>Request/Response DTOs - API contracts</li>
+ *   <li>Exception Handlers - global error handling</li>
+ *   <li>Filters and Interceptors - cross-cutting concerns</li>
+ *   <li>Validators - custom validation logic</li>
+ * </ul>
+ *
+ * @package com.alcoradar.alcoholshop.interfaces
+ */
+package com.alcoradar.alcoholshop.interfaces;
