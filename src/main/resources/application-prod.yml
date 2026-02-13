@@ -1,0 +1,18 @@
+# Production profile configuration
+# Use for production deployments
+
+logging:
+  level:
+    root: WARN
+    com.alcoradar.alcoholshop: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/alcohol-shop/application.log
+
+spring:
+  jpa:
+    show-sql: false
