@@ -1,6 +1,7 @@
 package com.alcoradar.alcoholshop.application.dto;
 
 import com.alcoradar.alcoholshop.domain.model.ShopType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -30,6 +31,7 @@ import jakarta.validation.constraints.Size;
  * @author AlcoRadar Team
  * @since 1.0
  */
+@Schema(description = "DTO для создания нового алкомаркета")
 public record CreateAlcoholShopRequest(
 
         /**
@@ -37,6 +39,11 @@ public record CreateAlcoholShopRequest(
          * <p>
          * Must be non-blank and unique across all shops.
          */
+        @Schema(
+                description = "Название алкомаркета",
+                example = "Алкомаркет на Проспекте Мира",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @NotBlank(message = "Shop name is required")
         String name,
 
@@ -46,6 +53,11 @@ public record CreateAlcoholShopRequest(
          * Must be non-blank with sufficient detail (10-500 characters).
          * This helps with location identification and mapping.
          */
+        @Schema(
+                description = "Физический адрес алкомаркета",
+                example = "г. Москва, ул. Проспект Мира, д. 123",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @NotBlank(message = "Address is required")
         @Size(min = 10, max = 500, message = "Address must be between 10 and 500 characters")
         String address,
@@ -55,6 +67,10 @@ public record CreateAlcoholShopRequest(
          * <p>
          * Nested validation is applied to ensure valid latitude/longitude values.
          */
+        @Schema(
+                description = "Географические координаты алкомаркета",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @Valid
         CoordinatesDto coordinates,
 
@@ -64,6 +80,10 @@ public record CreateAlcoholShopRequest(
          * Optional field - can be null if phone contact is not available.
          * Format is not enforced to accommodate international formats.
          */
+        @Schema(
+                description = "Контактный номер телефона",
+                example = "+7 (495) 123-45-67"
+        )
         String phoneNumber,
 
         /**
@@ -72,6 +92,10 @@ public record CreateAlcoholShopRequest(
          * Optional field - free-text description of shop schedule.
          * Examples: "09:00-22:00", "Mon-Fri: 10:00-20:00, Sat-Sun: 11:00-18:00"
          */
+        @Schema(
+                description = "Время работы",
+                example = "Пн-Пт: 09:00-22:00, Сб-Вс: 10:00-20:00"
+        )
         String workingHours,
 
         /**
@@ -80,6 +104,10 @@ public record CreateAlcoholShopRequest(
          * Optional field - defaults may be applied by the service layer.
          * See {@link ShopType} for available categories.
          */
+        @Schema(
+                description = "Тип алкомаркета",
+                example = "SUPERMARKET"
+        )
         ShopType shopType
 ) {
 }

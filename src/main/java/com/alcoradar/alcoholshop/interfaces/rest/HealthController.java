@@ -1,9 +1,16 @@
 package com.alcoradar.alcoholshop.interfaces.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @version 1.0.0
  * @since 2025
  */
+@Tag(name = "health", description = "API для проверки работоспособности сервиса")
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -39,6 +47,32 @@ public class HealthController {
      *
      * @return health response with status "UP" if service is healthy
      */
+    @Operation(
+            summary = "Проверить работоспособность сервиса",
+            description = """
+                    Возвращает текущий статус работоспособности сервиса.
+
+                    **Использование:**
+                    - Load balancers проверяют этот endpoint для маршрутизации трафика
+                    - Kubernetes использует для liveness/readiness probes
+                    - Мониторинг системы для оповещений
+
+                    **Ответ:**
+                    - status: "UP" - сервис работает нормально
+                    - Статус: 200 OK
+                    """,
+            tags = {"health"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Сервис работает нормально",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = HealthResponse.class)
+                    )
+            )
+    })
     @GetMapping("/health")
     public ResponseEntity<HealthResponse> health() {
         return ResponseEntity.ok(new HealthResponse("UP"));
@@ -49,6 +83,9 @@ public class HealthController {
      *
      * @param status the health status (e.g., "UP", "DOWN")
      */
-    public record HealthResponse(String status) {
+    @Schema(description = "Ответ health check endpoint")
+    public record HealthResponse(
+            @Schema(description = "Статус работоспособности сервиса", example = "UP")
+            String status) {
     }
 }

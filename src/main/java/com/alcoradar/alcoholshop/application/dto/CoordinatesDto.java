@@ -1,5 +1,6 @@
 package com.alcoradar.alcoholshop.application.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -20,6 +21,7 @@ import jakarta.validation.constraints.Min;
  * @author AlcoRadar Team
  * @since 1.0
  */
+@Schema(description = "Geographical coordinates with latitude and longitude")
 public record CoordinatesDto(
 
         /**
@@ -28,6 +30,11 @@ public record CoordinatesDto(
          * Must be between -90 (South Pole) and +90 (North Pole).
          * Positive values represent northern hemisphere, negative values southern.
          */
+        @Schema(
+                description = "Latitude coordinate in degrees (-90 to +90)",
+                example = "55.7558",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @Min(value = -90, message = "Latitude must be at least -90 degrees")
         @Max(value = 90, message = "Latitude must be at most 90 degrees")
         Double latitude,
@@ -38,6 +45,11 @@ public record CoordinatesDto(
          * Must be between -180 and +180.
          * Positive values represent eastern hemisphere, negative values western.
          */
+        @Schema(
+                description = "Longitude coordinate in degrees (-180 to +180)",
+                example = "37.6173",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
         @Min(value = -180, message = "Longitude must be at least -180 degrees")
         @Max(value = 180, message = "Longitude must be at most 180 degrees")
         Double longitude

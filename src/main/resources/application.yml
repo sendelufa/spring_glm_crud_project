@@ -50,3 +50,24 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+# SpringDoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /api-docs/openapi.json
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    display-request-duration: true
+    display-operation-id: false
+    default-models-expand-depth: 2
+    default-model-expand-depth: 2
+    show-extensions: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: shops
+      paths-to-match: /api/shops/**
+    - group: health
+      paths-to-match: /api/v1/health
+  show-actuator: true

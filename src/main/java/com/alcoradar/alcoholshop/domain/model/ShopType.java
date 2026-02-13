@@ -1,5 +1,7 @@
 package com.alcoradar.alcoholshop.domain.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Enumeration representing the type of alcohol shop.
  * <p>
@@ -17,6 +19,7 @@ package com.alcoradar.alcoholshop.domain.model;
  * @author AlcoRadar Team
  * @since 1.0
  */
+@Schema(description = "Type of alcohol shop")
 public enum ShopType {
 
     /**
@@ -30,6 +33,7 @@ public enum ShopType {
      *   <li>Multiple locations throughout cities</li>
      * </ul>
      */
+    @Schema(description = "Large retail chain with general merchandise including alcohol")
     SUPERMARKET("Supermarket", "Large retail chain with general merchandise including alcohol"),
 
     /**
@@ -43,6 +47,7 @@ public enum ShopType {
      *   <li>Limited locations, typically in city centers</li>
      * </ul>
      */
+    @Schema(description = "Specialized alcohol-focused shop with premium selection")
     SPECIALTY("Specialty Store", "Specialized alcohol-focused shop with premium selection"),
 
     /**
@@ -56,6 +61,7 @@ public enum ShopType {
      *   <li>Located in transport hubs</li>
      * </ul>
      */
+    @Schema(description = "Tax-free shop typically located at airports or border crossings")
     DUTY_FREE("Duty Free", "Tax-free shop typically located at airports or border crossings");
 
     private final String displayName;

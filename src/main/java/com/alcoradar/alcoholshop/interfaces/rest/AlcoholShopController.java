@@ -4,9 +4,17 @@ import com.alcoradar.alcoholshop.application.dto.AlcoholShopResponse;
 import com.alcoradar.alcoholshop.application.dto.CreateAlcoholShopRequest;
 import com.alcoradar.alcoholshop.application.dto.PageResponse;
 import com.alcoradar.alcoholshop.application.usecase.AlcoholShopUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +59,7 @@ import java.util.UUID;
  * @see CreateAlcoholShopRequest
  * @see AlcoholShopResponse
  */
+@Tag(name = "shops", description = "API для управления алкомаркетами")
 @RestController
 @RequestMapping("/api/shops")
 @RequiredArgsConstructor
@@ -70,6 +79,41 @@ public class AlcoholShopController {
      * @param request DTO с данными для создания алкомаркета
      * @return DTO созданного алкомаркета со статусом 201 Created
      */
+    @Operation(
+            summary = "Создать новый алкомаркет",
+            description = """
+                    Создаёт новый алкомаркет в системе.
+
+                    **Обязательные поля:**
+                    - name: название алкомаркета (минимум 2 символа)
+                    - address: адрес алкомаркета
+                    - chainName: название сети (если есть)
+                    - hasLicense: наличие лицензии (true/false)
+
+                    **Ответ:**
+                    - Возвращает созданный алкомаркет с присвоенным ID
+                    - Статус: 201 Created
+                    """,
+            tags = {"shops"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Алкомаркет успешно создан",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AlcoholShopResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Ошибка валидации входных данных",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(ref = "#/components/schemas/ValidationError")
+                    )
+            )
+    })
     @PostMapping
     ResponseEntity<AlcoholShopResponse> create(@Valid @RequestBody CreateAlcoholShopRequest request) {
         AlcoholShopResponse response = useCase.create(request);
@@ -86,8 +130,57 @@ public class AlcoholShopController {
      * @param id уникальный идентификатор алкомаркета
      * @return DTO найденного алкомаркета со статусом 200 OK
      */
+    @Operation(
+            summary = "Получить алкомаркет по ID",
+            description = """
+                    Возвращает алкомаркет по его уникальному идентификатору (UUID).
+
+                    **Параметр:**
+                    - id: UUID алкомаркета
+
+                    **Ответ:**
+                    - DTO алкомаркета со всей информацией
+                    - Статус: 200 OK
+
+                    **Ошибки:**
+                    - 404 Not Found: алкомаркет с указанным ID не существует
+                    """,
+            tags = {"shops"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Алкомаркет найден",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AlcoholShopResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Алкомаркет не найден",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(ref = "#/components/schemas/NotFoundError")
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверный формат UUID",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(ref = "#/components/schemas/BadRequestError")
+                    )
+            )
+    })
     @GetMapping("/{id}")
-    ResponseEntity<AlcoholShopResponse> findById(@PathVariable UUID id) {
+    ResponseEntity<AlcoholShopResponse> findById(
+            @Parameter(
+                    description = "Уникальный идентификатор алкомаркета (UUID)",
+                    example = "123e4567-e89b-12d3-a456-426614174000",
+                    required = true
+            )
+            @PathVariable UUID id) {
         AlcoholShopResponse response = useCase.findById(id);
         return ResponseEntity.ok(response);
     }
@@ -108,10 +201,62 @@ public class AlcoholShopController {
      * @param sortBy  поле для сортировки
      * @return страница с алкомаркетами и метаданными пагинации
      */
+    @Operation(
+            summary = "Получить список алкомаркетов",
+            description = """
+                    Возвращает страницу алкомаркетов с поддержкой пагинации и сортировки.
+
+                    **Параметры пагинации:**
+                    - page: номер страницы (начинается с 0, по умолчанию 0)
+                    - size: размер страницы (по умолчанию 10, максимум 100)
+                    - sortBy: поле для сортировки (по умолчанию "name")
+
+                    **Доступные поля для сортировки:**
+                    - name: по названию
+                    - address: по адресу
+                    - chainName: по названию сети
+
+                    **Ответ:**
+                    - Массив алкомаркетов
+                    - Метаданные пагинации (номер страницы, размер, всего элементов)
+                    - Статус: 200 OK
+                    """,
+            tags = {"shops"}
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Список алкомаркетов успешно получен",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PageResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверные параметры пагинации",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(ref = "#/components/schemas/BadRequestError")
+                    )
+            )
+    })
     @GetMapping
     ResponseEntity<PageResponse<AlcoholShopResponse>> findAll(
+            @Parameter(
+                    description = "Номер страницы (0-based)",
+                    example = "0"
+            )
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(
+                    description = "Размер страницы",
+                    example = "10"
+            )
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(
+                    description = "Поле для сортировки",
+                    example = "name"
+            )
             @RequestParam(defaultValue = "name") String sortBy
     ) {
         PageResponse<AlcoholShopResponse> response = useCase.findAll(page, size, sortBy);

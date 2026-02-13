@@ -1,6 +1,7 @@
 package com.alcoradar.alcoholshop.application.dto;
 
 import com.alcoradar.alcoholshop.domain.model.ShopType;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import java.util.UUID;
  * @author AlcoRadar Team
  * @since 1.0
  */
+@Schema(description = "DTO ответа с информацией об алкомаркете")
 public record AlcoholShopResponse(
 
         /**
@@ -32,6 +34,10 @@ public record AlcoholShopResponse(
          * <p>
          * System-generated UUID that uniquely identifies this shop entity.
          */
+        @Schema(
+                description = "Уникальный идентификатор алкомаркета",
+                example = "123e4567-e89b-12d3-a456-426614174000"
+        )
         UUID id,
 
         /**
@@ -39,6 +45,10 @@ public record AlcoholShopResponse(
          * <p>
          * Human-readable name that should be unique across all shops.
          */
+        @Schema(
+                description = "Название алкомаркета",
+                example = "Алкомаркет на Проспекте Мира"
+        )
         String name,
 
         /**
@@ -46,6 +56,10 @@ public record AlcoholShopResponse(
          * <p>
          * Full street address for navigation and identification.
          */
+        @Schema(
+                description = "Физический адрес алкомаркета",
+                example = "г. Москва, ул. Проспект Мира, д. 123"
+        )
         String address,
 
         /**
@@ -53,6 +67,9 @@ public record AlcoholShopResponse(
          * <p>
          * Contains latitude and longitude for mapping and proximity searches.
          */
+        @Schema(
+                description = "Географические координаты алкомаркета"
+        )
         CoordinatesDto coordinates,
 
         /**
@@ -60,6 +77,10 @@ public record AlcoholShopResponse(
          * <p>
          * May be null if phone contact is not available.
          */
+        @Schema(
+                description = "Контактный номер телефона",
+                example = "+7 (495) 123-45-67"
+        )
         String phoneNumber,
 
         /**
@@ -68,6 +89,10 @@ public record AlcoholShopResponse(
          * Free-text description of shop schedule.
          * May be null if working hours are not specified.
          */
+        @Schema(
+                description = "Время работы",
+                example = "Пн-Пт: 09:00-22:00, Сб-Вс: 10:00-20:00"
+        )
         String workingHours,
 
         /**
@@ -76,6 +101,10 @@ public record AlcoholShopResponse(
          * Categorizes the shop into SUPERMARKET, SPECIALTY, or DUTY_FREE.
          * May be null if not specified.
          */
+        @Schema(
+                description = "Тип алкомаркета",
+                example = "SUPERMARKET"
+        )
         ShopType shopType,
 
         /**
@@ -83,6 +112,10 @@ public record AlcoholShopResponse(
          * <p>
          * Automatically set by the system upon creation.
          */
+        @Schema(
+                description = "Время создания записи в системе",
+                example = "2025-02-14T10:30:00"
+        )
         LocalDateTime createdAt
 ) {
 }

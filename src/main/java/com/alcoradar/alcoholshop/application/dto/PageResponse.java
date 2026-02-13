@@ -1,5 +1,6 @@
 package com.alcoradar.alcoholshop.application.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.List;
  * @author AlcoRadar Team
  * @since 1.0
  */
+@Schema(description = "Generic response DTO for paginated data")
 public record PageResponse<T>(
 
         /**
@@ -30,6 +32,7 @@ public record PageResponse<T>(
          * <p>
          * May be empty if the current page has no data or if no results match the query.
          */
+        @Schema(description = "List of items for the current page")
         List<T> content,
 
         /**
@@ -37,6 +40,7 @@ public record PageResponse<T>(
          * <p>
          * Zero-based index, meaning the first page is 0.
          */
+        @Schema(description = "Current page number (0-based)", example = "0")
         int currentPage,
 
         /**
@@ -44,6 +48,7 @@ public record PageResponse<T>(
          * <p>
          * Number of items per page. The last page may contain fewer items.
          */
+        @Schema(description = "Number of items per page", example = "10")
         int pageSize,
 
         /**
@@ -51,6 +56,7 @@ public record PageResponse<T>(
          * <p>
          * This is the count of all items matching the query, not just on this page.
          */
+        @Schema(description = "Total count of items across all pages", example = "100")
         long totalElements,
 
         /**
@@ -58,6 +64,7 @@ public record PageResponse<T>(
          * <p>
          * Calculated as: ceiling(totalElements / pageSize)
          */
+        @Schema(description = "Total number of pages available", example = "10")
         int totalPages
 ) {
 
