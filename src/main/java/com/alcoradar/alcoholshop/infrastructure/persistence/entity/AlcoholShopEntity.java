@@ -56,7 +56,7 @@ public class AlcoholShopEntity {
     private String workingHours;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "shop_type", nullable = false)
+    @Column(name = "shop_type", nullable = true)
     private ShopType shopType;
 
     @Column(name = "created_at", nullable = false, updatable = false)
