@@ -3,7 +3,14 @@
     "allow": [
       "Bash(pgrep:*)",
       "Bash(wait:*)",
-      "Bash(ps:*)"
+      "Bash(ps:*)",
+      "Bash(git commit:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)"
     ]
   }
 }
