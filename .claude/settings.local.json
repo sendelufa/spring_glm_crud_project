@@ -25,7 +25,8 @@
       "Bash(./gradlew:*)",
       "Bash(psql:*)",
       "Bash(docker ps:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(python3 << 'EOF'\nimport uuid\nprint\\(uuid.uuid4\\(\\)\\)\nEOF)"
     ]
   }
 }
