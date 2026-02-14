@@ -248,7 +248,7 @@ public class AuthenticationController {
     @GetMapping("/me")
     @RequireAuth
     public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
-        UUID userId = (UUID) request.getAttribute("userId");
+        UUID userId = (UUID) request.getAttribute(com.alcoradar.alcoholshop.interfaces.security.JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
         UserResponse response = userRepository.findById(userId)
                 .map(UserResponse::from)
                 .orElseThrow(() -> new UserNotFoundException(userId));

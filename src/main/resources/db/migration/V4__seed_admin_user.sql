@@ -1,5 +1,5 @@
 -- src/main/resources/db/migration/V4__seed_admin_user.sql
--- Password: Admin123!
+-- Password: password123 (simple test password)
 -- BCrypt hash generated with work factor 10
 INSERT INTO users (
     id,
