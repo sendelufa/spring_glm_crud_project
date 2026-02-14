@@ -26,7 +26,13 @@
       "Bash(psql:*)",
       "Bash(docker ps:*)",
       "Bash(docker exec:*)",
-      "Bash(python3 << 'EOF'\nimport uuid\nprint\\(uuid.uuid4\\(\\)\\)\nEOF)"
+      "Bash(python3 << 'EOF'\nimport uuid\nprint\\(uuid.uuid4\\(\\)\\)\nEOF)",
+      "Bash(python3:*)",
+      "Bash(javac:*)",
+      "Bash(java:*)",
+      "Bash(TestBCrypt.java << 'EOF'\nimport org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;\n\npublic class TestBCrypt {\n    public static void main\\(String[] args\\) {\n        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder\\(10\\);\n        \n        String password = \"password123\";\n        String hash = encoder.encode\\(password\\);\n        \n        System.out.println\\(\"Generated hash: \" + hash\\);\n        System.out.println\\(\"Hash length: \" + hash.length\\(\\)\\);\n        System.out.println\\(\"Matches: \" + encoder.matches\\(password, hash\\)\\);\n        System.out.println\\(\\);\n        \n        // Test with the hash from migration\n        String migrationHash = \"$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhW\";\n        System.out.println\\(\"Migration hash: \" + migrationHash\\);\n        System.out.println\\(\"Migration hash length: \" + migrationHash.length\\(\\)\\);\n        System.out.println\\(\"Matches migration hash: \" + encoder.matches\\(password, migrationHash\\)\\);\n    }\n}\nEOF)",
+      "Bash(src/main/resources/db/migration/V6__reset_admin_password.sql << 'EOF'\n-- Reset admin password with properly generated BCrypt hash\n-- This migration ensures the admin user has a valid BCrypt password\n\n-- First, let's update the admin user with a simple BCrypt hash for \"admin123\"\nUPDATE users \nSET password = '$2a$10$N9qo8uLOickegx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhW',\n    updated_at = CURRENT_TIMESTAMP\nWHERE username = 'admin';\n\n-- Verify the update was successful\nSELECT username, LENGTH\\(password\\) as pwd_length, password \nFROM users \nWHERE username = 'admin';\nEOF)",
+      "Bash(tee:*)"
     ]
   }
 }

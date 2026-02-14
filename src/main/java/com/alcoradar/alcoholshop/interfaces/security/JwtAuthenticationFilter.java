@@ -1,6 +1,7 @@
 package com.alcoradar.alcoholshop.interfaces.security;
 
 import com.alcoradar.alcoholshop.application.service.SecurityService;
+import com.alcoradar.alcoholshop.domain.model.Role;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -67,6 +68,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     public static final String USER_ID_ATTRIBUTE = "userId";
 
+    /**
+     * The request attribute name where authenticated user role is stored.
+     */
+    public static final String USER_ROLE_ATTRIBUTE = "userRole";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                       HttpServletResponse response,
@@ -98,11 +104,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Validate JWT and extract claims
             Claims claims = securityService.validateAccessToken(token);
 
-            // Extract userId and set as request attribute for controllers to use
+            // Extract userId and userRole from JWT claims
             UUID userId = securityService.getUserIdFromToken(claims);
-            request.setAttribute(USER_ID_ATTRIBUTE, userId);
+            Role userRole = securityService.getRoleFromToken(claims);
 
-            log.debug("JwtAuthenticationFilter: Authentication successful for user {}", userId);
+            // Set both as request attributes for controllers/aspects to use
+            request.setAttribute(USER_ID_ATTRIBUTE, userId);
+            request.setAttribute(USER_ROLE_ATTRIBUTE, userRole);
+
+            log.debug("JwtAuthenticationFilter: Authentication successful for user {} with role {}", userId, userRole);
 
             // Proceed with authenticated request
             filterChain.doFilter(request, response);
