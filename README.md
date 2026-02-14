@@ -339,6 +339,49 @@ curl -X DELETE http://localhost:8080/api/shops/1
 
 **Ответ (204 No Content)** - тело ответа отсутствует
 
+## Authentication
+
+### Login Request
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+      "username": "admin",
+      "password": "Admin123!"
+    }'
+```
+
+### Login Response (200 OK)
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5c6...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5c6...",
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "username": "admin",
+    "role": "ADMIN"
+  }
+}
+```
+
+### Using Access Token
+
+```bash
+curl -X GET http://localhost:8080/api/shops \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c6..."
+```
+
+### Error Response (401 Unauthorized)
+
+```json
+{
+  "status": 401,
+  "message": "Invalid username or password"
+}
+```
+
 ### Обработка ошибок
 
 #### Магазин не найден (404 Not Found)
