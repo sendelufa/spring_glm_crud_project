@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -67,6 +68,7 @@ import java.util.UUID;
  * @see RefreshResponse
  * @see UserResponse
  */
+@Slf4j
 @Tag(name = "authentication", description = "Authentication and authorization endpoints")
 @RestController
 @RequestMapping("/api/auth")
@@ -91,6 +93,7 @@ public class AuthenticationController {
      * @param request DTO containing username and password
      * @return DTO with access token, refresh token, and user information
      */
+    @PostMapping("/login")
     @Operation(
             summary = "Authenticate user",
             description = """
@@ -131,8 +134,8 @@ public class AuthenticationController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ValidationError"))
             )
     })
-    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.info("User login attempt: {}", request.username());
         LoginResponse response = authenticationUseCase.login(request);
         return ResponseEntity.ok(response);
     }
@@ -149,6 +152,7 @@ public class AuthenticationController {
      * @param request DTO containing the refresh token
      * @return DTO with new access token
      */
+    @PostMapping("/refresh")
     @Operation(
             summary = "Refresh access token",
             description = """
@@ -186,7 +190,6 @@ public class AuthenticationController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ValidationError"))
             )
     })
-    @PostMapping("/refresh")
     public ResponseEntity<RefreshResponse> refresh(@Valid @RequestBody RefreshRequest request) {
         RefreshResponse response = authenticationUseCase.refreshToken(request);
         return ResponseEntity.ok(response);
@@ -200,11 +203,12 @@ public class AuthenticationController {
      * before the method executes.</p>
      *
      * <p>The user ID is extracted from the JWT token claims and stored as a request attribute
-     * by the authentication aspect.</p>
+     * by the authentication filter.</p>
      *
-     * @param request HTTP servlet request containing userId attribute set by authentication aspect
+     * @param request HTTP servlet request containing userId attribute set by authentication filter
      * @return DTO with current user information
      */
+    @GetMapping("/me")
     @Operation(
             summary = "Get current user",
             description = """
@@ -245,13 +249,13 @@ public class AuthenticationController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundError"))
             )
     })
-    @GetMapping("/me")
     @RequireAuth
     public ResponseEntity<UserResponse> getCurrentUser(HttpServletRequest request) {
         UUID userId = (UUID) request.getAttribute(com.alcoradar.alcoholshop.interfaces.security.JwtAuthenticationFilter.USER_ID_ATTRIBUTE);
         UserResponse response = userRepository.findById(userId)
                 .map(UserResponse::from)
                 .orElseThrow(() -> new UserNotFoundException(userId));
+        log.info("Retrieved user: {}", response.username());
         return ResponseEntity.ok(response);
     }
 }

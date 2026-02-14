@@ -94,7 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
             log.warn("JwtAuthenticationFilter: Missing or invalid Authorization header for {}", path);
-            sendUnauthorizedResponse(response, "Missing or invalid Authorization header");
+            sendUnauthorizedResponse(response, "Missing or invalid Authorization header", path);
             return;
         }
 
@@ -119,10 +119,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (com.alcoradar.alcoholshop.domain.exception.ExpiredTokenException e) {
             log.warn("JwtAuthenticationFilter: Expired token for {}", path);
-            sendUnauthorizedResponse(response, "Token has expired");
+            sendUnauthorizedResponse(response, "Token has expired", path);
         } catch (com.alcoradar.alcoholshop.domain.exception.InvalidTokenException e) {
             log.warn("JwtAuthenticationFilter: Invalid token for {} - {}", path, e.getMessage());
-            sendUnauthorizedResponse(response, "Invalid token");
+            sendUnauthorizedResponse(response, "Invalid token", path);
         }
     }
 
@@ -144,6 +144,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private boolean isPublicEndpoint(String path) {
         return path.startsWith("/api/auth/login") ||
                 path.startsWith("/api/auth/refresh") ||
+                path.startsWith("/api/shops") ||  // Public read access to shops
                 path.startsWith("/api/test/") ||  // Test data endpoints (development only)
                 path.startsWith("/actuator") ||
                 path.startsWith("/swagger-ui") ||
@@ -161,7 +162,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * @param message the error message to include in response body
      * @throws IOException if writing response fails
      */
-    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message, String path) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json");
         String jsonResponse = String.format("""
@@ -172,7 +173,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                   "detail": "%s",
                   "instance": "%s"
                 }
-                """, message, "/api/auth");
+                """, message, path);
         response.getWriter().write(jsonResponse);
     }
 }

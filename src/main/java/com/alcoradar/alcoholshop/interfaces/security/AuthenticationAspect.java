@@ -107,12 +107,18 @@ public class AuthenticationAspect {
         // Note: Role-based authorization would require fetching user from repository
         // or having the filter set user role as request attribute
         // For now, just log the role check requirement
+        // Get user role from request attribute
+        Role userRole = (Role) request.getAttribute(JwtAuthenticationFilter.USER_ROLE_ATTRIBUTE);
+
         if (requireAuth.roles().length > 0) {
             log.debug("AuthenticationAspect: Endpoint requires roles: {}", Arrays.toString(requireAuth.roles()));
-            // TODO: Implement role check once filter sets userRole attribute
+            if (!hasRequiredRole(userRole, requireAuth.roles())) {
+                log.warn("AuthenticationAspect: User role {} does not match required roles {}", userRole, Arrays.toString(requireAuth.roles()));
+                throw new AccessDeniedException(requireAuth.roles()[0], userRole);
+            }
         }
 
-        log.debug("AuthenticationAspect: Authorization successful for user {}", userId);
+        log.debug("AuthenticationAspect: Authorization successful for user {} with role {}", userId, userRole);
 
         // Proceed with authorized request
         return joinPoint.proceed();
@@ -146,6 +152,23 @@ public class AuthenticationAspect {
         }
 
         return hasRole;
+    }
+
+    /**
+     * Overload that checks role directly without Claims.
+     *
+     * @param userRole the user's role
+     * @param requiredRoles array of roles required to access method
+     * @return {@code true} if user has at least one of the required roles
+     */
+    private boolean hasRequiredRole(Role userRole, Role[] requiredRoles) {
+        if (requiredRoles == null || requiredRoles.length == 0) {
+            log.debug("AuthenticationAspect: No role requirement specified, allowing all authenticated users");
+            return true;
+        }
+
+        return Arrays.stream(requiredRoles)
+                .anyMatch(requiredRole -> requiredRole == userRole);
     }
 
     /**

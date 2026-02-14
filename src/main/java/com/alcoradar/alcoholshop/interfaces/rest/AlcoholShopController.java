@@ -117,6 +117,7 @@ public class AlcoholShopController {
             )
     })
     @PostMapping
+    @RequireAuth(roles = {Role.ADMIN})
     ResponseEntity<AlcoholShopResponse> create(@Valid @RequestBody CreateAlcoholShopRequest request) {
         AlcoholShopResponse response = useCase.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -245,7 +246,6 @@ public class AlcoholShopController {
             )
     })
     @GetMapping
-    @RequireAuth(roles = {Role.USER, Role.ADMIN})
     ResponseEntity<PageResponse<AlcoholShopResponse>> findAll(
             @Parameter(
                     description = "Номер страницы (0-based)",
