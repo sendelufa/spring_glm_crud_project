@@ -4,6 +4,8 @@ import com.alcoradar.alcoholshop.application.dto.AlcoholShopResponse;
 import com.alcoradar.alcoholshop.application.dto.CreateAlcoholShopRequest;
 import com.alcoradar.alcoholshop.application.dto.PageResponse;
 import com.alcoradar.alcoholshop.application.usecase.AlcoholShopUseCase;
+import com.alcoradar.alcoholshop.domain.model.Role;
+import com.alcoradar.alcoholshop.interfaces.security.RequireAuth;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -115,6 +117,7 @@ public class AlcoholShopController {
             )
     })
     @PostMapping
+    @RequireAuth(roles = {Role.USER, Role.ADMIN})
     ResponseEntity<AlcoholShopResponse> create(@Valid @RequestBody CreateAlcoholShopRequest request) {
         AlcoholShopResponse response = useCase.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
