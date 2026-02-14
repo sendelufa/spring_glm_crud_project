@@ -14,3 +14,9 @@ logging:
     org.springframework.web: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+security:
+  jwt:
+    secret: dev-secret-key-for-testing-only-change-in-production-at-least-256-bits
+    access-token-expiration: 900  # 15 minutes
+    refresh-token-expiration: 604800  # 7 days
