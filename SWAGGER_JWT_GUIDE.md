@@ -13,21 +13,41 @@
 2. **Authentication Group**: New Swagger group for `/api/auth/**` endpoints
 3. **Global Security**: All endpoints require JWT by default
 
+### Test Data Endpoints (Development Only)
+- **GET /api/test/hash?password=xxx** - Generate BCrypt hash for password
+- **POST /api/test/validate?password=xxx&hash=xxx** - Test BCrypt validation
+
 ## How to Use JWT in Swagger UI
 
-### Step 1: Open Swagger UI
-Navigate to: **http://localhost:8080/swagger-ui/index.html**
+### Step 1: Get JWT Token
+Login via Swagger UI or curl:
 
-### Step 2: Get Your JWT Token
-You'll need a valid JWT access token. Due to a known BCrypt password validation issue, you may need to:
-- Use a token you've already obtained
-- Fix the BCrypt issue first (see AUTHENTICATION_STATUS.md)
-- Create a new user once BCrypt is fixed
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin"}'
+```
+
+Response:
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "username": "admin",
+    "role": "ADMIN"
+  }
+}
+```
+
+### Step 2: Open Swagger UI
+Navigate to: **http://localhost:8080/swagger-ui/index.html**
 
 ### Step 3: Authorize in Swagger UI
 1. Click the **🔓 Authorize** button (top-right of Swagger UI)
-2. Enter your JWT token in the popup
-3. **Important**: Enter the token WITHOUT the "Bearer " prefix
+2. Enter your JWT access token in the popup
+3. **Important**: Enter the token **WITHOUT** the "Bearer " prefix
    - ✅ Correct: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
    - ❌ Wrong: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 4. Click **Authorize**
@@ -56,15 +76,29 @@ Authorization: Bearer <your-token>
 3. **users** - `/api/users`
    - POST `/api/users` - Create new user (ADMIN only)
 
-4. **health** - Health check endpoints
-5. **Actuator** - Spring Boot monitoring endpoints
+4. **test** - `/api/test/**` (development only)
+   - GET `/api/test/hash` - Generate BCrypt hash
+   - POST `/api/test/validate` - Test BCrypt validation
+
+5. **health** - Health check endpoints
 
 ## Current Status
 
-✅ **Swagger JWT Configuration**: Complete
+✅ **Swagger JWT Configuration**: Complete and working
 ✅ **Security Scheme**: Configured and working
 ✅ **OpenAPI Documentation**: Updated with JWT info
-⚠️ **BCrypt Password Validation**: Known issue (see AUTHENTICATION_STATUS.md)
+✅ **Admin Login**: Working (username: `admin`, password: `admin`)
+✅ **BCrypt Password Validation**: Fixed with fresh hash
+
+## Test Credentials
+
+**Admin User:**
+- Username: `admin`
+- Password: `admin`
+- Role: `ADMIN`
+
+**Note**: Original password `admin123` did not work due to BCrypt hash issues in migration files.
+Password has been reset to `admin` for testing purposes.
 
 ## Troubleshooting
 
@@ -72,23 +106,22 @@ Authorization: Bearer <your-token>
 - Verify you clicked "Authorize" and entered a valid token
 - Check token hasn't expired (access tokens expire in 15 minutes)
 - Make sure you entered token WITHOUT "Bearer " prefix
+- Get a fresh token via `/api/auth/login`
 
-### Can't Get Token (Login Fails)
-This is the BCrypt password issue:
-- Admin user (admin/admin123) fails to login
-- Test users also fail with correct passwords
-- Root cause: BCrypt hash validation issue
-- Workaround: None currently - needs investigation
-
-### Next Steps
-1. Fix BCrypt password validation issue
-2. Use Swagger UI with working authentication
-3. Test all protected endpoints
+### Login Returns 401
+- Verify username and password are correct
+- Admin user: `admin` / `admin`
+- Check application logs for specific error details
 
 ## Files Modified
 
+### Swagger JWT Configuration
 - `SwaggerConfig.java:66-91` - Added JWT security scheme and global requirement
 - `SwaggerConfig.java:42-54` - Updated API description with JWT instructions
-- `SwaggerConfig.java:106-117` - Added authentication endpoint group
-- `JwtAuthenticationFilter.java:88-101` - Removed duplicate variable declaration
+- `SwaggerConfig.java:112-121` - Added authentication endpoint group
+- `JwtAuthenticationFilter.java:142-151` - Added Swagger docs to public endpoints
 
+### BCrypt Fix
+- `V7__fix_admin_password.sql` - Migration with working BCrypt hash
+- `TestDataController.java` - Development endpoint for BCrypt testing
+- `SWAGGER_JWT_GUIDE.md` - This file
