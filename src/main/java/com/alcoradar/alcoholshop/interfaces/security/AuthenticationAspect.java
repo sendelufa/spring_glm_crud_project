@@ -15,6 +15,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * AOP aspect for enforcing authentication and authorization on methods annotated with {@link RequireAuth}.
@@ -93,6 +94,10 @@ public class AuthenticationAspect {
         try {
             // Validate JWT and extract claims
             Claims claims = securityService.validateAccessToken(token);
+
+            // Extract userId and set as request attribute for controllers to use
+            UUID userId = securityService.getUserIdFromToken(claims);
+            request.setAttribute("userId", userId);
 
             // Check role requirements
             if (!hasRequiredRole(claims, requireAuth.roles())) {

@@ -7,6 +7,7 @@ import com.alcoradar.alcoholshop.domain.repository.UserRepository;
 import com.alcoradar.alcoholshop.application.service.SecurityService;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
  * Use case for authentication operations.
  * Handles login, token refresh, and user creation following Clean Architecture principles.
  */
+@Service
 @RequiredArgsConstructor
 public class AuthenticationUseCase {
 
