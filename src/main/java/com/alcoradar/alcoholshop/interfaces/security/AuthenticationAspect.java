@@ -7,7 +7,6 @@ import com.alcoradar.alcoholshop.domain.exception.InvalidTokenException;
 import com.alcoradar.alcoholshop.domain.model.Role;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -61,10 +60,13 @@ import java.util.UUID;
 @Slf4j
 @Aspect
 @Component
-@RequiredArgsConstructor
 public class AuthenticationAspect {
 
     private final SecurityService securityService;
+
+    public AuthenticationAspect(SecurityService securityService) {
+        this.securityService = securityService;
+    }
 
     /**
      * Around advice for methods annotated with {@link RequireAuth}.

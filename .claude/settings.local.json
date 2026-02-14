@@ -11,7 +11,21 @@
       "Bash(git add:*)",
       "Bash(curl:*)",
       "Bash(pkill:*)",
-      "Bash(docker run:*)"
+      "Bash(docker run:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs:*)",
+      "Bash(find:*)",
+      "Bash(./mvnw:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(gradle:*)",
+      "Bash(grep:*)",
+      "Bash(xmllint:*)",
+      "WebSearch",
+      "Bash(jar:*)",
+      "Bash(./gradlew:*)",
+      "Bash(psql:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)"
     ]
   }
 }
