@@ -83,6 +83,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
+        // Protected endpoint - requires authentication
         // Extract Authorization header
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
@@ -136,6 +137,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/actuator") ||
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/api-docs") ||
+                path.startsWith("/v3/api-docs") ||  // SpringDoc OpenAPI JSON
                 path.startsWith("/webjars") ||
                 path.equals("/") ||
                 path.startsWith("/error");

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,8 +51,9 @@ public class SwaggerConfig {
             - Базовый путь: /api
 
             **Аутентификация:**
-            - В настоящее время не требуется
-            - В будущем будет добавлена OAuth2/JWT
+            - JWT Bearer токен требуется для защищенных эндпоинтов
+            - Получите токен через POST /api/auth/login
+            - Нажмите кнопку "Authorize" вверху и введите: Bearer <ваш_токен>
             """;
 
     private static final String API_VERSION = "1.0.0";
@@ -59,12 +62,14 @@ public class SwaggerConfig {
      * Configures the main OpenAPI documentation.
      *
      * <p>Sets up API metadata including title, description, version,
-     * contact information, and license details.</p>
+     * contact information, license details, and JWT security scheme.</p>
      *
      * @return configured OpenAPI specification
      */
     @Bean
     public OpenAPI alcoholShopOpenAPI() {
+        final String SECURITY_SCHEME_NAME = "bearer-jwt";
+
         return new OpenAPI()
                 .info(new Info()
                         .title(API_TITLE)
@@ -78,6 +83,13 @@ public class SwaggerConfig {
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
                 .components(new Components()
+                        // JWT Security Scheme
+                        .addSecuritySchemes(SECURITY_SCHEME_NAME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .description("JWT токен авторизации. Получите токен через POST /api/auth/login и введите его здесь (без префикса 'Bearer ')."))
                         // Common error responses
                         .addSchemas("BadRequestError", createBadRequestSchema())
                         .addSchemas("NotFoundError", createNotFoundSchema())
@@ -85,7 +97,9 @@ public class SwaggerConfig {
                         // Common API responses
                         .addResponses("BadRequest", createBadRequestResponse())
                         .addResponses("NotFound", createNotFoundResponse())
-                        .addResponses("ValidationError", createValidationResponse()));
+                        .addResponses("ValidationError", createValidationResponse()))
+                // Apply security globally (can be overridden per endpoint)
+                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME));
     }
 
     /**
@@ -100,6 +114,19 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("shops")
                 .pathsToMatch("/api/shops/**")
+                .build();
+    }
+
+    /**
+     * Creates a grouped OpenAPI for authentication endpoints.
+     *
+     * @return GroupedOpenApi for auth controller
+     */
+    @Bean
+    public GroupedOpenApi authApi() {
+        return GroupedOpenApi.builder()
+                .group("authentication")
+                .pathsToMatch("/api/auth/**")
                 .build();
     }
 
