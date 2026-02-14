@@ -6,6 +6,7 @@ import com.alcoradar.alcoholshop.domain.exception.ExpiredTokenException;
 import com.alcoradar.alcoholshop.domain.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
+/**
+ * Security service for JWT token generation/validation and BCrypt password hashing.
+ *
+ * <p>Provides:
+ * <ul>
+ *   <li>JWT access token generation with user claims (userId, username, role)</li>
+ *   <li>JWT refresh token generation (without role claim for security)</li>
+ *   <li>Token validation with type checking (access vs refresh)</li>
+ *   <li>BCrypt password hashing with configurable work factor</li>
+ *   <li>Password verification</li>
+ * </ul>
+ *
+ * @throws InvalidTokenException for invalid or malformed tokens
+ * @throws ExpiredTokenException for expired tokens
+ */
 @Slf4j
 @Service
 public class SecurityService {
@@ -23,16 +39,37 @@ public class SecurityService {
     @Value("${security.jwt.secret}")
     private String jwtSecret;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+    @Value("${security.password.bcrypt-strength:10}")
+    private int bcryptStrength;
+    private BCryptPasswordEncoder passwordEncoder;
 
     private static final String CLAIM_USER_ID = "userId";
     private static final String CLAIM_USERNAME = "username";
     private static final String CLAIM_ROLE = "role";
     private static final String CLAIM_TYPE = "type";
 
+    @PostConstruct
+    public void init() {
+        if (jwtSecret == null || jwtSecret.length() < 32) {
+            throw new IllegalStateException("JWT secret must be at least 256 bits (32 characters)");
+        }
+        this.passwordEncoder = new BCryptPasswordEncoder(bcryptStrength);
+    }
+
     public String generateAccessToken(User user, int expirationSeconds) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + (long) expirationSeconds * 1000);
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (user.getId() == null || user.getUsername() == null || user.getRole() == null) {
+            throw new IllegalArgumentException("User must have id, username, and role");
+        }
+        if (expirationSeconds <= 0) {
+            throw new IllegalArgumentException("Expiration seconds must be positive");
+        }
+
+        Date[] dates = createExpirationDates(expirationSeconds);
+        Date now = dates[0];
+        Date expiry = dates[1];
 
         return Jwts.builder()
             .subject(user.getId().toString())
@@ -47,8 +84,19 @@ public class SecurityService {
     }
 
     public String generateRefreshToken(User user, int expirationSeconds) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + (long) expirationSeconds * 1000);
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (user.getId() == null || user.getUsername() == null) {
+            throw new IllegalArgumentException("User must have id and username");
+        }
+        if (expirationSeconds <= 0) {
+            throw new IllegalArgumentException("Expiration seconds must be positive");
+        }
+
+        Date[] dates = createExpirationDates(expirationSeconds);
+        Date now = dates[0];
+        Date expiry = dates[1];
 
         return Jwts.builder()
             .subject(user.getId().toString())
@@ -60,6 +108,12 @@ public class SecurityService {
             .compact();
     }
 
+    private Date[] createExpirationDates(int expirationSeconds) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + (long) expirationSeconds * 1000);
+        return new Date[]{now, expiry};
+    }
+
     public Claims validateAccessToken(String token) {
         try {
             Claims claims = Jwts.parser()
@@ -68,8 +122,9 @@ public class SecurityService {
                 .parseSignedClaims(token)
                 .getPayload();
 
-            if (!"access".equals(claims.get(CLAIM_TYPE, String.class))) {
-                throw new InvalidTokenException("Token is not an access token");
+            String tokenType = claims.get(CLAIM_TYPE, String.class);
+            if (tokenType == null || !"access".equals(tokenType)) {
+                throw new InvalidTokenException("Token is missing or has invalid type claim (expected 'access')");
             }
 
             return claims;
@@ -88,8 +143,9 @@ public class SecurityService {
                 .parseSignedClaims(token)
                 .getPayload();
 
-            if (!"refresh".equals(claims.get(CLAIM_TYPE, String.class))) {
-                throw new InvalidTokenException("Token is not a refresh token");
+            String tokenType = claims.get(CLAIM_TYPE, String.class);
+            if (tokenType == null || !"refresh".equals(tokenType)) {
+                throw new InvalidTokenException("Token is missing or has invalid type claim (expected 'refresh')");
             }
 
             return claims;
@@ -101,19 +157,41 @@ public class SecurityService {
     }
 
     public String hashPassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be null or blank");
+        }
         return passwordEncoder.encode(rawPassword);
     }
 
     public boolean checkPassword(String rawPassword, String hashedPassword) {
+        if (rawPassword == null || hashedPassword == null) {
+            throw new IllegalArgumentException("Passwords cannot be null");
+        }
         return passwordEncoder.matches(rawPassword, hashedPassword);
     }
 
     public UUID getUserIdFromToken(Claims claims) {
-        return UUID.fromString(claims.get(CLAIM_USER_ID, String.class));
+        try {
+            String userIdStr = claims.get(CLAIM_USER_ID, String.class);
+            if (userIdStr == null) {
+                throw new InvalidTokenException("Token missing userId claim");
+            }
+            return UUID.fromString(userIdStr);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidTokenException("Invalid userId in token: " + e.getMessage());
+        }
     }
 
     public Role getRoleFromToken(Claims claims) {
-        return Role.valueOf(claims.get(CLAIM_ROLE, String.class));
+        try {
+            String roleStr = claims.get(CLAIM_ROLE, String.class);
+            if (roleStr == null) {
+                throw new InvalidTokenException("Token missing role claim");
+            }
+            return Role.valueOf(roleStr);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidTokenException("Invalid role in token: " + e.getMessage());
+        }
     }
 
     private SecretKey getSigningKey() {

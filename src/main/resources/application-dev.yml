@@ -20,3 +20,5 @@ security:
     secret: dev-secret-key-for-testing-only-change-in-production-at-least-256-bits
     access-token-expiration: 900  # 15 minutes
     refresh-token-expiration: 604800  # 7 days
+  password:
+    bcrypt-strength: 10

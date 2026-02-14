@@ -25,6 +25,9 @@ class SecurityServiceTest {
     void setUp() {
         securityService = new SecurityService();
         ReflectionTestUtils.setField(securityService, "jwtSecret", "test-secret-key-for-testing-at-least-256-bits-long-enough-for-hmac-sha256");
+        ReflectionTestUtils.setField(securityService, "bcryptStrength", 10);
+        // Manually call @PostConstruct to initialize passwordEncoder
+        securityService.init();
     }
 
     @Test
@@ -84,6 +87,7 @@ class SecurityServiceTest {
     void shouldThrowExceptionWhenValidatingRefreshTokenAsAccess() {
         User user = User.builder()
             .id(UUID.randomUUID())
+            .username("testuser")
             .role(Role.USER)
             .build();
 
@@ -91,13 +95,14 @@ class SecurityServiceTest {
 
         assertThatThrownBy(() -> securityService.validateAccessToken(refreshToken))
             .isInstanceOf(InvalidTokenException.class)
-            .hasMessageContaining("not an access token");
+            .hasMessageContaining("expected 'access'");
     }
 
     @Test
     void shouldThrowExceptionWhenValidatingAccessTokenAsRefresh() {
         User user = User.builder()
             .id(UUID.randomUUID())
+            .username("testuser")
             .role(Role.USER)
             .build();
 
@@ -105,7 +110,7 @@ class SecurityServiceTest {
 
         assertThatThrownBy(() -> securityService.validateRefreshToken(accessToken))
             .isInstanceOf(InvalidTokenException.class)
-            .hasMessageContaining("not a refresh token");
+            .hasMessageContaining("expected 'refresh'");
     }
 
     @Test
@@ -143,6 +148,7 @@ class SecurityServiceTest {
     void shouldExtractUserIdFromClaims() {
         User user = User.builder()
             .id(UUID.randomUUID())
+            .username("testuser")
             .role(Role.USER)
             .build();
 
@@ -158,6 +164,7 @@ class SecurityServiceTest {
     void shouldExtractRoleFromClaims() {
         User user = User.builder()
             .id(UUID.randomUUID())
+            .username("adminuser")
             .role(Role.ADMIN)
             .build();
 
