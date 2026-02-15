@@ -21,88 +21,38 @@ log_error() {
     echo -e "${COLOR_RED}[ERROR]${COLOR_NC} $1"
 }
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    log_error "This script must be run as root (use sudo)"
-    exit 1
-fi
-
 log_info "Starting deployment of AlcoholShop application..."
+log_info "Running as user: $(whoami)"
+log_info "Working directory: $(pwd)"
 
-# Step 1: Update system
-log_info "Updating system packages..."
-apt update && apt upgrade -y
-
-# Step 2: Set timezone
-log_info "Setting timezone to Europe/Moscow..."
-timedatectl set-timezone Europe/Moscow 2>/dev/null || true
-
-# Step 3: Create application user
-log_info "Creating application user 'app'..."
-if ! id "app" &>/dev/null; then
-    useradd -m -s /bin/bash app
-    usermod -aG sudo app
-    log_info "User 'app' created"
-else
-    log_info "User 'app' already exists"
-fi
-
-# Step 4: Install Docker
-log_info "Installing Docker..."
+# Check if Docker is available
 if ! command -v docker &> /dev/null; then
-    apt install -y curl git ca-certificates gnupg
-
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    apt update
-    apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-
-    systemctl enable docker
-    systemctl start docker
-
-    log_info "Docker installed successfully"
-else
-    log_info "Docker already installed"
-fi
-
-# Step 5: Add app user to docker group
-log_info "Adding 'app' user to docker group..."
-usermod -aG docker app
-
-# Step 6: Configure firewall
-log_info "Configuring firewall..."
-if command -v ufw &> /dev/null; then
-    ufw allow 22/tcp
-    ufw allow 80/tcp
-    ufw allow 443/tcp
-    ufw --force enable
-    log_info "Firewall configured"
-else
-    log_warn "UFW not installed, skipping firewall configuration"
-fi
-
-# Step 7: Clone repository (if not already cloned)
-log_info "Setting up application..."
-APP_DIR="/home/sendel/myaiproject"
-JAVA_DIR="$APP_DIR/java"
-
-if [ ! -d "$JAVA_DIR" ]; then
-    log_error "Repository not found at $JAVA_DIR"
-    log_error "Please clone your repository first or update the path in this script"
+    log_error "Docker is not installed. Please install Docker first:"
+    log_error "  https://docs.docker.com/get-docker/"
     exit 1
 fi
 
-# Step 8: Setup .env file
+# Check if user can run docker
+if ! docker ps &> /dev/null; then
+    log_error "Cannot run Docker commands. Make sure your user is in the docker group:"
+    log_error "  sudo usermod -aG docker \$(whoami)"
+    log_error "Then log out and back in for changes to take effect."
+    exit 1
+fi
+
+log_info "Docker is available and ready"
+
+# Setup application directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+log_info "Application directory: $SCRIPT_DIR"
+
+# Setup .env file
 log_info "Configuring environment variables..."
-ENV_FILE="$JAVA_DIR/.env"
+ENV_FILE="$SCRIPT_DIR/.env"
 
 if [ ! -f "$ENV_FILE" ]; then
-    if [ -f "$JAVA_DIR/.env.example" ]; then
-        cp "$JAVA_DIR/.env.example" "$ENV_FILE"
+    if [ -f "$SCRIPT_DIR/.env.example" ]; then
+        cp "$SCRIPT_DIR/.env.example" "$ENV_FILE"
 
         # Generate secure JWT secret
         JWT_SECRET=$(openssl rand -base64 32)
@@ -112,7 +62,6 @@ if [ ! -f "$ENV_FILE" ]; then
         DB_PASSWORD=$(openssl rand -base64 16 | tr -d "=+/" | cut -c1-16)
         sed -i "s/your_secure_password_here/$DB_PASSWORD/" "$ENV_FILE"
 
-        chown app:app "$ENV_FILE"
         chmod 600 "$ENV_FILE"
 
         log_info "Environment file created"
@@ -126,12 +75,12 @@ else
     log_info ".env file already exists"
 fi
 
-# Step 9: Start application with Docker Compose
+# Start application with Docker Compose
 log_info "Building and starting application..."
-cd "$JAVA_DIR"
+cd "$SCRIPT_DIR"
 
 # Build and start services
-sudo -u app docker compose up -d --build
+docker compose up -d --build
 
 # Wait for services to be healthy
 log_info "Waiting for services to start..."
@@ -142,7 +91,7 @@ MAX_ATTEMPTS=30
 ATTEMPT=0
 
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-    if sudo -u app docker compose ps | grep -q "healthy"; then
+    if docker compose ps | grep -q "healthy"; then
         log_info "Services started successfully!"
         break
     fi
@@ -163,7 +112,7 @@ log_info "Deployment completed successfully!"
 log_info "=========================================="
 echo ""
 log_info "Application Status:"
-sudo -u app docker compose ps
+docker compose ps
 echo ""
 log_info "Useful Commands:"
 echo "  View logs:        docker compose logs -f"
