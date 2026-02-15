@@ -14,7 +14,7 @@ Complete guide to deploy AlcoholShop Spring Boot application on a clean Ubuntu V
 ## Quick Start (One-Command Deploy)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_REPO/main/deploy.sh | bash
+curl -fsSL https://raw.githubusercontent.com/YOUR_USERNAME/alcohol-shop/main/java/deploy.sh | bash
 ```
 
 ---
@@ -69,7 +69,7 @@ sudo su - app
 
 # Clone your repository (replace with your repo URL)
 git clone https://github.com/YOUR_USERNAME/alcohol-shop.git ~/app
-cd ~/app/java
+cd ~/app/java  # or adjust path based on your repo structure
 ```
 
 ### Step 4: Configure Environment Variables
